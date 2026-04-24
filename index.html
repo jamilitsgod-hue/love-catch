@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💥 LOVE CATCH EXTREME 💥</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #ff1744, #f50057, #c51162);
+            height: 100vh; overflow: hidden; display: flex; 
+            justify-content: center; align-items: center; 
+        }
+        .game-container {
+            text-align: center; background: rgba(255,255,255,0.98);
+            padding: 40px; border-radius: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            max-width: 600px; width: 95%; border: 3px solid #fff;
+        }
+        h1 { 
+            color: #d500f9; margin-bottom: 30px; font-size: 3.5em; 
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.4); 
+        }
+        
+        /* START BUTTON PALING GEDE */
+        #startScreen button {
+            background: linear-gradient(45deg, #00e676, #4caf50) !important;
+            color: #000 !important; font-weight: bold !important;
+            border: 5px solid #fff !important; 
+            padding: 35px 80px !important; font-size: 2.8em !important;
+            border-radius: 70px !important; cursor: pointer !important;
+            transition: all 0.4s ease !important; box-shadow: 0 25px 50px rgba(0,230,118,0.6) !important;
+            margin: 30px 0 !important; text-transform: uppercase !important;
+            letter-spacing: 4px !important;
+        }
+        #startScreen button:hover {
+            transform: translateY(-15px) scale(1.1) !important;
+            box-shadow: 0 40px 80px rgba(0,230,118,0.8) !important;
+        }
+        
+        .info { display: flex; justify-content: space-between; margin: 25px 0; font-size: 1.8em; font-weight: bold; }
+        .time { color: #ff1744; }
+        .score { color: #d500f9; }
+        
+        .game-area {
+            width: 100%; height: 500px; position: relative; margin: 25px 0;
+            border: 6px solid #ff1744; border-radius: 25px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.95), rgba(255,240,240,0.95));
+            overflow: hidden; cursor: pointer;
+        }
+        .emoji {
+            position: absolute; font-size: 3.8em; pointer-events: auto;
+            transition: all 0.1s ease; animation: bounce 1.5s infinite;
+            user-select: none;
+        }
+        .emoji:hover { transform: scale(1.5) !important; }
+        @keyframes bounce {
+            0%,100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(20deg); }
+        }
+        
+        .progress-bar { 
+            width: 100%; height: 20px; background: rgba(255,255,255,0.9); 
+            border-radius: 12px; margin: 20px 0; overflow: hidden; 
+        }
+        .progress-fill { 
+            height: 100%; background: linear-gradient(90deg, #00e676, #4caf50); 
+            width: 0%; transition: width 0.15s ease; border-radius: 12px;
+        }
+        
+        .game-over { display: none; background: rgba(213,0,249,0.98); color: white; 
+            padding: 35px; border-radius: 25px; margin-top: 25px; 
+        }
+        
+        .restart-btn, .pap-btn {
+            background: linear-gradient(45deg, #ff9800, #ff5722);
+            color: white; border: none; padding: 20px 50px; 
+            font-size: 1.5em; border-radius: 50px; cursor: pointer; 
+            margin: 15px; box-shadow: 0 15px 30px rgba(255,152,0,0.5);
+            font-weight: bold;
+        }
+        .pap-btn {
+            background: linear-gradient(45deg, #9c27b0, #e91e63);
+            box-shadow: 0 15px 30px rgba(156,39,176,0.5);
+        }
+        
+        #startScreen, #gameInfo { display: block; }
+        #gameOver { display: none; }
+        #papSection { display: none; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>💥 LOVE CATCH 💥</h1>
+        
+        <!-- START SCREEN -->
+        <div id="startScreen">
+            <h2 style="color:#fff; font-size:2em; margin-bottom:20px;">5 DETIK | 100 TARGET</h2>
+            <button onclick="startGame()">🚀 START GAME 🚀</button>
+        </div>
+        
+        <!-- GAME SCREEN -->
+        <div id="gameInfo" style="display:none;">
+            <div class="info">
+                <div class="time">⏰ <span id="timer">5</span>s</div>
+                <div class="score">❤️ <span id="score">0</span>/100</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <div class="game-area" id="gameArea"></div>
+        </div>
+        
+        <!-- GAME OVER -->
+        <div id="gameOver" class="game-over">
+            <h2 id="gameOverTitle">GAME OVER!</h2>
+            <p id="finalScore"></p>
+            
+            <!-- PAP SECTION - HANYA TAMPIL SAAT GAGAL -->
+            <div id="papSection">
+                <h3 style="color:#ffeb3b; font-size:1.8em; margin:20px 0;">
+                    ❌ GAGAL! KIRIM PAP 3 📸
+                </h3>
+                <button class="pap-btn" onclick="kirimPap()">📸 Kirim PAP 3</button>
+                <button class="pap-btn" onclick="bukaKamera()">📱 Buka Kamera</button>
+            </div>
+            
+            <button class="restart-btn" onclick="restartGame()" style="margin-top:20px;">🔄 MAIN LAGI</button>
+        </div>
+    </div>
+
+    <script>
+        let gameActive = false;
+        let timeLeft = 5;
+        let score = 0;
+        let timerInterval, emojiInterval;
+        let emojis = [];
+        const TARGET_SCORE = 100;
+        const MAX_EMOJIS = 18;
+
+        const els = {
+            gameArea: document.getElementById('gameArea'),
+            timerEl: document.getElementById('timer'),
+            scoreEl: document.getElementById('score'),
+            startScreen: document.getElementById('startScreen'),
+            gameInfo: document.getElementById('gameInfo'),
+            gameOver: document.getElementById('gameOver'),
+            gameOverTitle: document.getElementById('gameOverTitle'),
+            finalScore: document.getElementById('finalScore'),
+            papSection: document.getElementById('papSection'),
+            progress: document.getElementById('progress')
+        };
+
+        const loveEmojis = ['💕','❤️','💖','💗','💓','💞','😍','🥰','💘','💝'];
+
+        function getRandomInt(max) { return Math.floor(Math.random() * max); }
+        function getRandomPos() {
+            const rect = els.gameArea.getBoundingClientRect();
+            const x = getRandomInt(rect.width - 80) + 40;
+            const y = getRandomInt(rect.height - 80) + 40;
+            return {x, y};
+        }
+
+        function updateProgress() {
+            const percent = Math.min((score / TARGET_SCORE) * 100, 100);
+            els.progress.style.width = percent + '%';
+        }
+
+        function createEmoji() {
+            if (!gameActive || emojis.length >= MAX_EMOJIS) return;
+            
+            const emoji = document.createElement('div');
+            emoji.className = 'emoji';
+            emoji.textContent = loveEmojis[getRandomInt(loveEmojis.length)];
+            const pos = getRandomPos();
+            emoji.style.left = pos.x + 'px';
+            emoji.style.top = pos.y + 'px';
+
+            emoji.onclick = (e) => {
+                e.stopPropagation();
+                if (gameActive) {
+                    score++;
+                    els.scoreEl.textContent = score;
+                    updateProgress();
+                    emoji.style.opacity = '0';
+                    emoji.style.transform = 'scale(1.5)';
+                    setTimeout(() => emoji.remove(), 100);
+                    emojis = emojis.filter(em => em !== emoji);
+                }
+            };
+
+            els.gameArea.appendChild(emoji);
+            emojis.push(emoji);
+
+            setTimeout(() => {
+                if (emoji.parentNode) {
+                    emoji.style.opacity = '0.2';
+                    emoji.style.pointerEvents = 'none';
+                    setTimeout(() => {
+                        if (emoji.parentNode) emoji.remove();
+                        emojis = emojis.filter(em => em !== emoji);
+                    }, 300);
+                }
+            }, 1200);
+        }
+
+        function startGame() {
+            gameActive = true;
+            timeLeft = 5;
+            score = 0;
+            els.timerEl.textContent = '5';
+            els.scoreEl.textContent = '0';
+            updateProgress();
+            
+            els.startScreen.style.display = 'none';
+            els.gameInfo.style.display = 'block';
+            els.gameOver.style.display = 'none';
+            els.gameArea.style.cursor = 'pointer';
+            
+            emojis.forEach(e => e.remove());
+            emojis = [];
+            els.gameArea.innerHTML = '';
+            
+            // Start timers
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                els.timerEl.textContent = timeLeft;
+                if (timeLeft <= 0) endGame();
+            }, 1000);
+            
+            emojiInterval = setInterval(createEmoji, 140);
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            clearInterval(emojiInterval);
+            els.gameArea.style.cursor = 'default';
+            
+            els.gameInfo.style.display = 'none';
+            els.gameOver.style.display = 'block';
+            
+            if (score >= TARGET_SCORE) {
+                els.gameOverTitle.textContent = '🎉 YOU WIN! 🎉';
+                els.finalScore.innerHTML = `Perfect! ${score}/100 ❤️`;
+                els.papSection.style.display = 'none';
+            } else {
+                els.gameOverTitle.textContent = '💥 GAME OVER 💥';
+                els.finalScore.innerHTML = `Score: ${score}/100<br>Target: ${TARGET_SCORE-score} lagi`;
+                els.papSection.style.display = 'block'; // PAP HANYA SAAT GAGAL
+            }
+        }
+
+        function restartGame() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            clearInterval(emojiInterval);
+            els.gameInfo.style.display = 'none';
+            els.startScreen.style.display = 'block';
+            els.gameOver.style.display = 'none';
+            els.papSection.style.display = 'none';
+        }
+
+        function kirimPap() {
+            const text = `📸 PAP 3! Gagal Love Catch score ${score}/100 😭`;
+            navigator.clipboard.writeText(text);
+            alert('✅ PAP TEXT COPIED!\n' + text);
+        }
+
+        function bukaKamera() {
+            alert('📱 Buka kamera HP kamu dan ambil PAP 3 sekarang!');
+        }
+
+        // AUTO START ON CLICK
+        document.getElementById('startScreen').onclick = startGame;
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        import java.awt.Desktop;
+import java.net.URI;
+
+public class BukaChrome {
+    public static void main(String[] args) {
+        try {
+            Desktop.getDesktop().browse(new URI("https://www.google.com"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+    </script>
+</body>
+</html>
