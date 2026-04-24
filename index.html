@@ -55,7 +55,7 @@ h1 { font-size:3em; color:#d500f9; margin-bottom:20px; }
 }
 
 button {
-    margin-top:15px;
+    margin-top:10px;
     padding:10px 20px;
     border:none;
     border-radius:10px;
@@ -84,8 +84,8 @@ button {
 <div id="gameOver" class="game-over">
     <h2 id="result"></h2>
 
-    <!-- tombol copy -->
-    <button onclick="copyPap()">📋 Copy Text PAP</button><br>
+    <button onclick="copyPap()">📋 Copy Text</button>
+    <button onclick="kirimWA()">📲 Kirim ke WhatsApp</button><br>
 
     <button onclick="restartGame()">🔄 Main Lagi</button>
 </div>
@@ -157,6 +157,17 @@ function endGame(){
 function copyPap(){
     const text = "Aku kalah 😭 harus kirim PAP imut 3 📸😳";
     navigator.clipboard.writeText(text);
+}
+
+function kirimWA(){
+    const text = `😭 Aku kalah di LOVE CATCH!
+Score: ${score}/100
+
+Sesuai aturan...
+Aku harus kirim PAP imut 3 📸😳`;
+
+    const url = "https://wa.me/?text=" + encodeURIComponent(text);
+    window.open(url, "_blank");
 }
 
 function restartGame(){
