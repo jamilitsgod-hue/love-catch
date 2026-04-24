@@ -51,6 +51,15 @@ h1 { font-size:3em; color:#d500f9; margin-bottom:20px; }
 
 .game-over {
     display:none;
+    margin-top:20px;
+}
+
+button {
+    margin-top:15px;
+    padding:10px 20px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
 }
 </style>
 </head>
@@ -74,7 +83,11 @@ h1 { font-size:3em; color:#d500f9; margin-bottom:20px; }
 
 <div id="gameOver" class="game-over">
     <h2 id="result"></h2>
-    <button onclick="restartGame()">Main Lagi</button>
+
+    <!-- tombol copy -->
+    <button onclick="copyPap()">📋 Copy Text PAP</button><br>
+
+    <button onclick="restartGame()">🔄 Main Lagi</button>
 </div>
 </div>
 
@@ -131,10 +144,20 @@ function endGame(){
     document.getElementById("gameOver").style.display="block";
 
     if(score>=100){
-        document.getElementById("result").innerText="MENANG!";
+        document.getElementById("result").innerHTML = "🎉 MENANG! 🎉";
     } else {
-        document.getElementById("result").innerText="KALAH 😭 ("+score+")";
+        document.getElementById("result").innerHTML = `
+            😭 KALAH! (${score}/100)<br><br>
+            ❗ HUKUMAN ❗<br>
+            Kirim PAP imutnya 3 📸😏
+        `;
     }
+}
+
+function copyPap(){
+    const text = "Aku kalah 😭 harus kirim PAP imut 3 📸😳";
+    navigator.clipboard.writeText(text);
+    alert("Text berhasil di-copy 😈");
 }
 
 function restartGame(){
